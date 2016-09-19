@@ -86,6 +86,7 @@ DATABASES = {
     "riak"         : "com.yahoo.ycsb.db.riak.RiakKVClient",
     "s3"           : "com.yahoo.ycsb.db.S3Client",
     "solr"         : "com.yahoo.ycsb.db.SolrClient",
+    "tair"         : "com.yahoo.ycsb.db.TairClient",
     "tarantool"    : "com.yahoo.ycsb.db.TarantoolClient",
     "voldemort"    : "com.yahoo.ycsb.db.VoldemortClient"
 }
