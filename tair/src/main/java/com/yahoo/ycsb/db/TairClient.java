@@ -40,7 +40,7 @@ import java.util.*;
 public class TairClient extends DB {
 
   private DefaultTairManager tairManager = null;
-  private int defaultNamespace = 961;
+  private int defaultNamespace = 0;
   private int maxValueLength = 4096;
 
   public static final String MASTERCS = "tair.mastercs";
@@ -61,8 +61,6 @@ public class TairClient extends DB {
     String slaveString = props.getProperty(SLAVECS);
     if (slaveString != null) {
       configserverList.add(slaveString);
-    } else {
-      configserverList.add(masterString);
     }
 
     String groupname = props.getProperty(GROUPNAME);
@@ -70,13 +68,17 @@ public class TairClient extends DB {
       throw new DBException("must specify groupname info");
     }
 
-    tairManager = new DefaultTairManager();
+    tairManager = new DefaultTairManager("DefaultTairManager", false);
     tairManager.setConfigServerList(configserverList);
     tairManager.setGroupName(groupname);
     tairManager.init();
+/*
+    tairManager.setTimeout(2000);
+*/
   }
 
   public void cleanup() throws DBException {
+    System.out.println("Tair Manager Closed.");
     tairManager.close();
   }
 
@@ -107,19 +109,23 @@ public class TairClient extends DB {
   public Status read(String table, String key, Set<String> fields,
                      HashMap<String, ByteIterator> result) {
     Result<DataEntry> rde = tairManager.get(defaultNamespace, key);
+    //System.out.println("read..., key: " + key + ", value: " + rde.getValue());
     if (rde.getRc().equals(ResultCode.SUCCESS)) {
       return Status.OK;
-    } else if (rde.getRc().equals(ResultCode.DATANOTEXSITS)) {
-      return Status.NOT_FOUND;
+    } else {
+      System.out.println(rde.getRc());
+      if (rde.getRc().equals(ResultCode.DATANOTEXSITS)) {
+        return Status.NOT_FOUND;
+      }
+      return Status.ERROR;
     }
-    return Status.ERROR;
   }
 
   @Override
   public Status insert(String table, String key,
                        HashMap<String, ByteIterator> values) {
     String value = getValueStr(values);
-//    System.out.println("insert..., key: " + key + ", value: " + value);
+    //System.out.println("insert..., key: " + key + ", value: " + value);
     ResultCode code = tairManager.put(defaultNamespace, key, value);
     if (code.equals(ResultCode.SUCCESS)) {
       return Status.OK;
@@ -147,5 +153,4 @@ public class TairClient extends DB {
     System.out.println("scan...");
     return Status.NOT_IMPLEMENTED;
   }
-
 }
