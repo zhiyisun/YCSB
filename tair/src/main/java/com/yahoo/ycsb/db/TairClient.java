@@ -71,15 +71,20 @@ public class TairClient extends DB {
     tairManager = new DefaultTairManager("DefaultTairManager", false);
     tairManager.setConfigServerList(configserverList);
     tairManager.setGroupName(groupname);
-    tairManager.init();
 /*
     tairManager.setTimeout(2000);
 */
+    tairManager.init();
   }
 
   public void cleanup() throws DBException {
-    System.out.println("Tair Manager Closed.");
+  /* Remove close because close happened before other oprations.
+   * That causes timeout error at the end of test.
+   * Will debug it more.
+   */
+/*
     tairManager.close();
+*/
   }
 
   /*
